@@ -1,0 +1,20 @@
+/* ===== 设计令牌（Design Tokens）：暗色高级感 · 黑金 ===== */
+:root {
+  --bg: #0b0910;
+  --bg-soft: #100d17;
+  --surface: #161220;
+  --surface-2: #1e1830;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f4f1ea;
+  --text-dim: #a79f90;
+  --text-faint: #6f675c;
+  --accent: #d8b25f;
+  --accent-bright: #f0d48a;
+  --accent-dim: rgba(216, 178, 95, 0.14);
+  --danger: #e06a6a;
+  --ok: #7cc07c;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --tabbar: 62px;
+  --font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
+}
