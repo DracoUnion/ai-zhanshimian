@@ -1,7 +1,7 @@
 """用户相关 Schema。"""
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UserOut(BaseModel):
@@ -11,14 +11,6 @@ class UserOut(BaseModel):
     phone: str
     nickname: str | None = None
     avatar_url: str | None = None
-    unlocked: bool
-    credits: int
-    trial_used: bool
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def trial_available(self) -> bool:
-        return not self.trial_used
 
 
 class UserUpdate(BaseModel):

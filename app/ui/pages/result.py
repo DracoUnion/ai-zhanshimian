@@ -73,7 +73,7 @@ class ResultPage(ScrollPage):
         t = QLabel("AI 正在为你生成…")
         t.setAlignment(Qt.AlignCenter)
         t.setProperty("class", "h2")
-        s = QLabel("约 30 秒~2 分钟，生成失败会自动退回次数，请稍候")
+        s = QLabel("约 30 秒~2 分钟，失败会自动提示，请稍候")
         s.setAlignment(Qt.AlignCenter)
         s.setProperty("class", "muted")
         ly.addWidget(spin)
@@ -103,67 +103,41 @@ class ResultPage(ScrollPage):
 
         if detail.status == "success":
             self._render_success(detail)
-            self.ctx.refresh_balance()
         else:
             self._render_failed(detail)
 
     def _render_success(self, detail: GenerationDetail) -> None:
-        is_trial_free = detail.credit_cost == 0
+        card = QFrame()
+        card.setProperty("card", True)
+        lay = QVBoxLayout(card)
+        lay.setContentsMargins(16, 16, 16, 16)
+        lay.setSpacing(10)
+        t = QLabel(f"已生成 {len(detail.results)} 张")
+        t.setProperty("class", "section")
+        lay.addWidget(t)
+        grid = QGridLayout()
+        grid.setSpacing(10)
+        for i, shot in enumerate(detail.results):
+            grid.addWidget(self._shot(shot, i), i // 2, i % 2)
+        lay.addLayout(grid)
+        self.body.addWidget(card)
 
-        def _apply(state: dict):
-            if is_trial_free and not state.get("unlocked"):
-                hint = QFrame()
-                hint.setProperty("card", True)
-                hl = QHBoxLayout(hint)
-                hl.setContentsMargins(14, 12, 14, 12)
-                col = QVBoxLayout()
-                b = QLabel("这张是免费体验")
-                b.setProperty("class", "accent")
-                b.setStyleSheet("font-weight:700; font-size:14px; background:transparent;")
-                col.addWidget(b)
-                s = QLabel("解锁后继续生成，风格模板 + 多张成组全开放")
-                s.setProperty("class", "muted")
-                col.addWidget(s)
-                hl.addLayout(col)
-                go = QPushButton("去解锁")
-                go.setProperty("class", "gold")
-                go.clicked.connect(lambda: self.ctx.navigate("pricing"))
-                hl.addWidget(go)
-                self.body.addWidget(hint)
-
-            card = QFrame()
-            card.setProperty("card", True)
-            lay = QVBoxLayout(card)
-            lay.setContentsMargins(16, 16, 16, 16)
-            lay.setSpacing(10)
-            t = QLabel(f"已生成 {len(detail.results)} 张")
-            t.setProperty("class", "section")
-            lay.addWidget(t)
-            grid = QGridLayout()
-            grid.setSpacing(10)
-            for i, shot in enumerate(detail.results):
-                grid.addWidget(self._shot(shot, i), i // 2, i % 2)
-            lay.addLayout(grid)
-            self.body.addWidget(card)
-
-            row = QFrame()
-            row.setStyleSheet("background:transparent;")
-            rl = QVBoxLayout(row)
-            rl.setContentsMargins(0, 0, 0, 0)
-            btns = QHBoxLayout()
-            btns.setSpacing(10)
-            again = QPushButton("再生成一组")
-            again.setProperty("class", "ghost")
-            again.clicked.connect(lambda: self.ctx.navigate("workspace"))
-            hist = QPushButton("查看我的记录")
-            hist.setProperty("class", "gold")
-            hist.clicked.connect(lambda: self.ctx.navigate("history"))
-            btns.addWidget(again)
-            btns.addWidget(hist)
-            rl.addLayout(btns)
-            self.body.addWidget(row)
-
-        run_in_worker(_fetch_state, _apply, lambda _e: None)
+        row = QFrame()
+        row.setStyleSheet("background:transparent;")
+        rl = QVBoxLayout(row)
+        rl.setContentsMargins(0, 0, 0, 0)
+        btns = QHBoxLayout()
+        btns.setSpacing(10)
+        again = QPushButton("再生成一组")
+        again.setProperty("class", "ghost")
+        again.clicked.connect(lambda: self.ctx.navigate("workspace"))
+        hist = QPushButton("查看我的记录")
+        hist.setProperty("class", "gold")
+        hist.clicked.connect(lambda: self.ctx.navigate("history"))
+        btns.addWidget(again)
+        btns.addWidget(hist)
+        rl.addLayout(btns)
+        self.body.addWidget(row)
 
     def _shot(self, shot: ResultImage, index: int) -> QFrame:
         box = QFrame()
@@ -229,12 +203,8 @@ class ResultPage(ScrollPage):
         s.setProperty("class", "muted")
         s.setAlignment(Qt.AlignCenter)
         s.setWordWrap(True)
-        r = QLabel("已为你退回本次次数")
-        r.setProperty("class", "muted")
-        r.setAlignment(Qt.AlignCenter)
         ly.addWidget(t)
         ly.addWidget(s)
-        ly.addWidget(r)
         self.body.addWidget(box)
 
         btn = QPushButton("重新生成")
@@ -264,9 +234,3 @@ def _fetch_detail(gen_id: int) -> dict:
     from app.services import facade as svc
 
     return svc.generation_detail(gen_id)
-
-
-def _fetch_state() -> dict:
-    from app.services import facade as svc
-
-    return svc.state()

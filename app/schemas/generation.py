@@ -24,9 +24,10 @@ class GenerationCreateOut(BaseModel):
     generation_id: int
     status: str
     quantity: int
-    credit_cost: int
-    trial_used: bool
-    balance: int
+
+    @classmethod
+    def from_gen(cls, gen) -> "GenerationCreateOut":
+        return cls(generation_id=gen.id, status=gen.status, quantity=gen.quantity)
 
 
 class TemplateBrief(BaseModel):
@@ -45,8 +46,6 @@ class GenerationDetail(BaseModel):
     generation_id: int
     status: str
     quantity: int
-    credit_cost: int
-    charged: bool
     selfie_url: str | None = None
     reference_url: str | None = None
     prompt: str | None = None
@@ -61,7 +60,6 @@ class GenerationListItem(BaseModel):
     generation_id: int
     status: str
     quantity: int
-    credit_cost: int
     template_name: str | None = None
     first_result_url: str | None = None
     created_at: datetime | None = None

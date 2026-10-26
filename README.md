@@ -4,11 +4,13 @@
 
 原 FastAPI 后端 + React 前端已重构为 **PySide6 桌面程序**：移除 HTTP 层，
 UI 直接调用服务层（`app/services`）。鉴于此为单机工具，**用户系统、后台管理、
-充值/支付均已彻底移除**：
+充值/支付、生成次数限制均已彻底移除**：
 
-- 无登录/注册：运行时自动建立一条「本机账户」承载试用/解锁/余额（`services/local_user.py`）；
-- 解锁为本地一次性操作：69 元解锁包直接置解锁态并赠送 69 次（`services/facade.py: unlock`）；
-- 计费流程：免费试用 1 次 → 69 解锁赠送 69 次 → 消耗余额生成；失败自动退回。
+- 无登录/注册：运行时自动建立一条「本机账户」（`services/local_user.py`）；
+- **免费无限次生成**：无余额/解锁/试用概念，生成失败可无限重试；
+- LLM/AIGC 调用统一走 `OpenAIClient`（`app/ai/openai_client.py`，源自
+  `../BookerGptTool/BookerGptTool/openai.py` 裁剪而来），真实生图通过
+  `OpenAIClient.call_tti` 对接任意 OpenAI 兼容底座，mock 模式离线占位。
 
 ## 快速开始
 
@@ -31,7 +33,7 @@ python -m venv .venv
 .venv/Scripts/python -m pytest app/tests -v
 ```
 
-服务层冒烟（试用/解锁/扣费/幂等/历史）+ UI 离屏启动冒烟。
+服务层冒烟（免费生成/幂等/历史/校验）+ AIGC/OpenAIClient 接线（离线）+ UI 离屏启动冒烟。
 
 ## 目录
 
@@ -42,14 +44,16 @@ app/
 ├── config.py          # pydantic-settings 配置（默认路径基于项目根 ./data）
 ├── core/              # 错误码 / 时间工具
 ├── db/                # Engine / Session（SQLite WAL + busy_timeout）
-├── models/            # users/generations/templates/balance_transactions/idempotency_keys
+├── models/            # users/generations/templates/idempotency_keys
 ├── schemas/           # Pydantic v2 校验
+├── ai/                # OpenAIClient（对话/视觉/文生图，所有 LLM 调用入口）
 ├── services/          # 业务门面(facade) + 生图/存储/AIGC 适配器
 ├── tasks/             # 生图线程池 + 卡单兜底
 ├── ui/                # PySide6：主窗口 / 页面 / 组件 / 主题
-└── tests/             # 服务层 + UI 冒烟
+└── tests/             # 服务层 + AIGC 接线 + UI 冒烟
 ```
 
 ## 生产上真实 AIGC
 
-`.env` 配 `AIGC_PROVIDER=http` + `AIGC_HTTP_URL`（请求体见 `services/aigc.py`）。
+`.env` 配 `AIGC_PROVIDER=openai` + `AIGC_HTTP_TOKEN`（API Key）+ `AIGC_MODEL`
+（如 gpt-image-1），见 `.env.example`；所有生图经 `OpenAIClient.call_tti`。

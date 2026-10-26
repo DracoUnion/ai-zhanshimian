@@ -27,7 +27,7 @@ def test_main_window_builds_and_navigates(qapp, fresh_db):
     win.show()
     _pump(qapp)
 
-    for key in ("home", "workspace", "history", "pricing", "account", "home"):
+    for key in ("home", "workspace", "history", "account", "home"):
         win.navigate(key)
         _pump(qapp)
 

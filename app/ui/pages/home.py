@@ -10,7 +10,7 @@ from .base import ScrollPage
 STEPS = [
     ("01", "上传一张正面自拍", "不改变五官，只优化穿搭、光线与场景"),
     ("02", "选择喜欢的风格", "海边、咖啡厅、健身房… 多款氛围可选"),
-    ("03", "AI 生成展示面", "约 1 元/张，成功后才扣次数"),
+    ("03", "AI 生成展示面", "免费无限次，想生成多少就生成多少"),
 ]
 
 
@@ -30,7 +30,7 @@ class HomePage(ScrollPage):
         hy.setSpacing(12)
         hy.setAlignment(Qt.AlignHCenter)
 
-        badge = banner_label("先免费生成 1 张", "gold")
+        badge = banner_label("免费无限次生成", "gold")
         badge.setFixedWidth(120)
         hy.addWidget(badge, 0, Qt.AlignCenter)
 
@@ -86,27 +86,3 @@ class HomePage(ScrollPage):
             row.addStretch(1)
             hly.addLayout(row)
         self.body.addWidget(how)
-
-        # ---- 定价 teaser ----
-        teaser = QFrame()
-        teaser.setProperty("card", True)
-        tly = QVBoxLayout(teaser)
-        tly.setContentsMargins(18, 18, 18, 18)
-        tly.setSpacing(10)
-        tfree = banner_label("先体验 · 再付费", "gold")
-        tfree.setFixedWidth(110)
-        tly.addWidget(tfree, 0, Qt.AlignCenter)
-        price = QLabel("¥69 解锁全部功能")
-        price.setProperty("class", "h2")
-        price.setAlignment(Qt.AlignCenter)
-        tly.addWidget(price)
-        pnote = QLabel("约 1 元/张 · 用完按需充值 · 失败自动退回")
-        pnote.setProperty("class", "muted")
-        pnote.setAlignment(Qt.AlignCenter)
-        tly.addWidget(pnote)
-        tp = QPushButton("查看套餐")
-        tp.setProperty("class", "ghost")
-        tp.setFixedWidth(140)
-        tp.clicked.connect(lambda: self.ctx.navigate("pricing"))
-        tly.addWidget(tp, 0, Qt.AlignCenter)
-        self.body.addWidget(teaser)

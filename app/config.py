@@ -38,15 +38,16 @@ class Settings(BaseSettings):
     s3_secret_key: str = ""
     s3_region: str = ""
 
-    # --- AIGC 图生图 ---
-    aigc_provider: str = "mock"                       # mock | http
-    aigc_mock_delay: float = 1.5
-    aigc_http_url: str = ""
-    aigc_http_token: str = ""
+    # --- AIGC 图生图（真实生图走 OpenAIClient，见 app/ai/openai_client.py） ---
+    aigc_provider: str = "mock"                       # mock | openai
+    aigc_mock_delay: float = 1.5                      # 模拟生图耗时
+    aigc_http_url: str = ""                           # OpenAI 兼容底座 base_url（留空用官方）
+    aigc_http_token: str = ""                         # API Key
+    aigc_model: str = "gpt-image-1"                   # 文生图/图生图模型
+    aigc_image_size: str = "1024x1024"
+    aigc_tti_retry: int = 3                           # 单张生图重试次数
 
-    # --- 业务规则（单机本地：试用 1 次 → 69 解锁赠送 69 次；无充值/支付） ---
-    welcome_credits: int = 69                         # 69 解锁包赠送次数
-    trial_quantity: int = 1
+    # --- 业务规则（免费无限次：无余额/解锁/充值概念） ---
     max_quantity: int = 12
     max_selfie_size: int = 5 * 1024 * 1024
     max_reference_size: int = 8 * 1024 * 1024

@@ -22,7 +22,7 @@ from ..worker import call_error_message, run_in_worker
 from .base import ScrollPage
 
 PROMPT_PRESETS = ["日系", "商务", "运动", "文艺", "都市"]
-QTY_OPTIONS = [(1, "约 1 元"), (6, "多张更划算"), (12, "成系列出图")]
+QTY_OPTIONS = [(1, "单张"), (6, "成组"), (12, "系列出图")]
 
 
 class WorkspacePage(ScrollPage):
@@ -85,7 +85,7 @@ class WorkspacePage(ScrollPage):
         self.body.addWidget(prompt_card)
 
         # 4. 张数
-        qty_card, qty_lay, _ = self._section("生成张数", "每次生成会在成功后才扣次数")
+        qty_card, qty_lay, _ = self._section("生成张数", "免费无限次，每次可生成一组")
         qrow = QHBoxLayout()
         qrow.setSpacing(10)
         self.qty_buttons: dict[int, QPushButton] = {}
@@ -108,7 +108,7 @@ class WorkspacePage(ScrollPage):
         bly = QVBoxLayout(bar)
         bly.setContentsMargins(0, 6, 0, 0)
         bly.setSpacing(8)
-        self.go_btn = QPushButton("登录后免费生成")
+        self.go_btn = QPushButton("免费生成")
         self.go_btn.setProperty("class", "gold")
         self.go_btn.setProperty("block", True)
         self.go_btn.clicked.connect(self._submit)
@@ -208,24 +208,7 @@ class WorkspacePage(ScrollPage):
 
     def _update_ready(self) -> None:
         self.go_btn.setEnabled(self._ready() and not self._submitting)
-        self._refresh_note()
-
-    def _refresh_note(self) -> None:
-        def _apply(state: dict):
-            if state["trial_available"]:
-                self.go_btn.setText("免费生成这张")
-                self.status_note.setText(
-                    f"剩余 {state['credits']} 次 · 本次免费体验" if (state["credits"] or state["trial_available"]) else "本次免费体验"
-                )
-            elif not state["unlocked"]:
-                self.go_btn.setText("去解锁后生成")
-                self.status_note.setText("剩余 0 次 · 未解锁")
-            else:
-                self.go_btn.setText(f"生成（将扣 {self.quantity} 次）")
-                self.status_note.setText(f"剩余 {state['credits']} 次 · 已解锁")
-            self._update_ready()
-
-        run_in_worker(svc.state, _apply, lambda _e: None)
+        self.status_note.setText("免费无限次生成 · 成功才出图，失败请重试")
 
     # ---------- 提交 ----------
     def _submit(self) -> None:
@@ -234,18 +217,7 @@ class WorkspacePage(ScrollPage):
         if not self.selfie_key:
             self.ctx.toast.show("先上传一张自拍", "error")
             return
-
-        def _stage(state: dict):
-            trial_ok = state["trial_available"]
-            if not trial_ok and not state["unlocked"]:
-                self.ctx.unlock(on_done=self._submit)
-                return
-            if not trial_ok and state["credits"] < self.quantity:
-                self.ctx.toast.show("生成次数不足，暂无法继续生成", "error")
-                return
-            self._do_create()
-
-        run_in_worker(svc.state, _stage, lambda e: self.ctx.toast.show(call_error_message(e), "error"))
+        self._do_create()
 
     def _do_create(self) -> None:
         self._submitting = True
@@ -254,14 +226,13 @@ class WorkspacePage(ScrollPage):
 
         def _done(result: dict) -> None:
             self._submitting = False
-            self.ctx.refresh_balance()
             self.ctx.navigate("result", int(result["generation_id"]))
 
         def _fail(err) -> None:
             self._submitting = False
             self.go_btn.setEnabled(self._ready())
             self.ctx.toast.show(call_error_message(err), "error")
-            self._refresh_note()
+            self._update_ready()
 
         run_in_worker(
             svc.create_generation,

@@ -1,4 +1,4 @@
-"""服务层冒烟测试：本机账户 → 试用生成 → 解锁/充值 → 付费生成幂等与扣费。
+"""服务层冒烟测试：免费无限次生成（试用/解锁/扣费/余额已彻底移除）。
 
 运行：python -m pytest app/tests -v
 """
@@ -22,10 +22,8 @@ def _run_gen(gen_id: int) -> None:
 # ---------- 基础状态 / 模板 ----------
 def test_initial_local_state(fresh_db):
     state = svc.state()
-    assert state["credits"] == 0
-    assert state["unlocked"] is False
-    assert state["trial_used"] is False
-    assert state["trial_available"] is True
+    assert state["user_id"] > 0
+    assert state["nickname"] is None
 
 
 def test_templates_seeded(fresh_db):
@@ -36,91 +34,55 @@ def test_templates_seeded(fresh_db):
     assert first["prompt_template"]
 
 
-# ---------- 试用生成 ----------
-def test_trial_generation_flow(fresh_db, sync_generation):
+# ---------- 免费无限次生成 ----------
+def test_generation_flow(fresh_db, sync_generation):
     up = dict(_upload())
     result = svc.create_generation(
         selfie_key=up["object_key"],
         template_id=1,
-        quantity=1,
-        idempotency_key="k-trial-1",
+        quantity=2,
+        idempotency_key="k-1",
     )
-    assert result["credit_cost"] == 0
-    assert result["trial_used"] is True
-    assert result["balance"] == 0
+    assert result["status"] == "pending"
+    assert result["quantity"] == 2
 
     _run_gen(result["generation_id"])
     detail = svc.generation_detail(result["generation_id"])
     assert detail["status"] == "success"
-    assert len(detail["results"]) == 1
-
-    # 试用已用、无余额 → 未解锁再次生成应报 FEATURE_LOCKED
-    with pytest.raises(BizError) as ei:
-        svc.create_generation(selfie_key=up["object_key"], template_id=1, quantity=1, idempotency_key="k-trial-2")
-    assert ei.value.code == ErrCode.FEATURE_LOCKED
-
-
-# ---------- 解锁 / 付费生成（本地一次性解锁，无充值无支付） ----------
-def test_local_unlock_flow(fresh_db, sync_generation):
-    assert not svc.state()["unlocked"]
-    assert svc.state()["credits"] == 0
-    result = svc.unlock()
-    assert result["unlocked"] is True
-    assert result["credits"] == 69
-    assert svc.state()["unlocked"] is True
-    assert svc.state()["credits"] == 69
-
-    # 幂等：重复解锁不重复赠送
-    again = svc.unlock()
-    assert again["credits"] == 69
-    assert svc.state()["credits"] == 69
-
-
-def test_local_unlock_then_generation_flow(fresh_db, sync_generation):
-    assert not svc.state()["trial_used"]
-    svc.unlock()
-
-    up = dict(_upload())
-
-    # 未用过试用 → 首单优先免费试用（不扣费）
-    r0 = svc.create_generation(selfie_key=up["object_key"], prompt="咖啡厅氛围", quantity=1, idempotency_key="k-0")
-    assert r0["credit_cost"] == 0
-    assert r0["trial_used"] is True
-    assert svc.state()["credits"] == 69
-
-    # 付费生成 quantity=2 → 扣 2
-    r = svc.create_generation(selfie_key=up["object_key"], prompt="街头潮流感", quantity=2, idempotency_key="k-1")
-    assert r["credit_cost"] == 2
-    assert r["balance"] == 67
-    _run_gen(r["generation_id"])
-    detail = svc.generation_detail(r["generation_id"])
-    assert detail["status"] == "success"
     assert len(detail["results"]) == 2
-    assert svc.state()["credits"] == 67
 
-    # 幂等键：重复提交不重复扣费、返回同一记录
-    rdup = svc.create_generation(selfie_key=up["object_key"], prompt="街头潮流感", quantity=2, idempotency_key="k-1")
-    assert rdup["generation_id"] == r["generation_id"]
-    assert svc.state()["credits"] == 67
+    # 连续第二次生成仍成功（无限次）
+    result2 = svc.create_generation(
+        selfie_key=up["object_key"],
+        template_id=2,
+        quantity=1,
+        idempotency_key="k-2",
+    )
+    _run_gen(result2["generation_id"])
+    assert svc.generation_detail(result2["generation_id"])["status"] == "success"
 
 
-def test_balance_insufficient(fresh_db, sync_generation):
-    svc.unlock()  # 69 次
+def test_generation_idempotency_key(fresh_db, sync_generation):
     up = dict(_upload())
-    svc.create_generation(selfie_key=up["object_key"], prompt="试用", quantity=1, idempotency_key="b-trial")
-    # 已解锁且余额不足 12 → BALANCE_INSUFFICIENT
-    for n in range(5):
-        svc.create_generation(selfie_key=up["object_key"], prompt="消耗", quantity=12, idempotency_key=f"b-{n}")
-    assert svc.state()["credits"] == 9
-    with pytest.raises(BizError) as ei:
-        svc.create_generation(selfie_key=up["object_key"], prompt="超额", quantity=12, idempotency_key="b-over")
-    assert ei.value.code == ErrCode.BALANCE_INSUFFICIENT
+    r1 = svc.create_generation(selfie_key=up["object_key"], prompt="街拍", quantity=1, idempotency_key="dup-1")
+    r2 = svc.create_generation(selfie_key=up["object_key"], prompt="街拍", quantity=1, idempotency_key="dup-1")
+    assert r2["generation_id"] == r1["generation_id"]
+    assert svc.generation_list(1, 20)["total"] == 1
+
+
+def test_custom_prompt_generation(fresh_db, sync_generation):
+    up = dict(_upload())
+    result = svc.create_generation(selfie_key=up["object_key"], prompt="海边日落，暖光氛围", quantity=1)
+    _run_gen(result["generation_id"])
+    detail = svc.generation_detail(result["generation_id"])
+    assert detail["status"] == "success"
+    assert detail["prompt"] == "海边日落，暖光氛围"
 
 
 # ---------- 历史列表 / 删除 ----------
 def test_generation_list_and_delete(fresh_db, sync_generation):
     up = dict(_upload())
-    r = svc.create_generation(selfie_key=up["object_key"], template_id=2, quantity=1, idempotency_key="k-list-1")
+    r = svc.create_generation(selfie_key=up["object_key"], template_id=2, quantity=1)
     _run_gen(r["generation_id"])
 
     listing = svc.generation_list(1, 20)
@@ -143,3 +105,7 @@ def test_input_validation(fresh_db):
     with pytest.raises(BizError) as ei:
         svc.upload_image("selfie", b"data", "text/plain")
     assert ei.value.code == ErrCode.UPLOAD_INVALID
+
+    # template_id 与 prompt 至少其一
+    with pytest.raises(Exception):
+        svc.create_generation(selfie_key="u/1/x.jpg", quantity=1)

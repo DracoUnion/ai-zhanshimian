@@ -132,9 +132,7 @@ class HistoryPage(ScrollPage):
         name = QLabel(it.template_name or "自定义提示词")
         name.setStyleSheet("background:transparent; font-weight:600; font-size:14px;")
         name.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-        meta = QLabel(
-            f"{_fmt_time(it.created_at)} · {it.quantity} 张" + (f" · 扣 {it.credit_cost} 次" if it.credit_cost > 0 else "")
-        )
+        meta = QLabel(f"{_fmt_time(it.created_at)} · {it.quantity} 张")
         meta.setProperty("class", "faint")
         meta.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         info.addWidget(name)

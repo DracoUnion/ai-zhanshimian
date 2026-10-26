@@ -2,8 +2,8 @@
 
 - UI 线程只做受理（accept_generation），生图在 `ThreadPoolExecutor` 后台执行；
 - 测试可置 `AUTO_RUN=False` 后手动同步调用 `run_generation(gen_id)` 获得确定性；
-- 失败采用任务内重试（退避），重试耗尽才置 failed 并退款；
-  另有 `sweep_stuck_generations()` 兜底：挂起超时的 pending/processing 自动失败退款。
+- 失败采用任务内重试（退避），重试耗尽才置 failed（免费无限次，无退款）；
+  另有 `sweep_stuck_generations()` 兜底：挂起超时的 pending/processing 自动失败。
 """
 from __future__ import annotations
 
@@ -20,7 +20,6 @@ from app.db.session import SessionLocal
 from app.models.generation import Generation
 from app.models.template import Template
 from app.services.aigc import get_aigc
-from app.services.billing import refund_generation
 from app.services.storage import get_storage
 
 logger = logging.getLogger(__name__)
@@ -59,7 +58,7 @@ def submit_generation(gen_id: int) -> None:
 
 
 def run_generation(gen_id: int) -> None:
-    """执行一次生图：pending → processing → success / failed（失败退款）。"""
+    """执行一次生图：pending → processing → success / failed。"""
     with SessionLocal() as db:
         gen = db.get(Generation, gen_id)
         if gen is None or gen.status != "pending":
@@ -116,6 +115,7 @@ def run_generation(gen_id: int) -> None:
 
 
 def _fail_and_refund(gen_id: int, reason: str) -> None:
+    """生成失败置 failed（免费无限次，无退款）。"""
     with SessionLocal() as db:
         gen = db.get(Generation, gen_id)
         if gen is None:
@@ -123,12 +123,11 @@ def _fail_and_refund(gen_id: int, reason: str) -> None:
         gen.status = "failed"
         gen.fail_reason = reason[:200]
         gen.finished_at = utcnow()
-        refund_generation(db, gen)
         db.commit()
 
 
 def sweep_stuck_generations() -> None:
-    """兜底：超时未完成的生成任务 → 失败 + 退款（防线程池崩溃挂起）。"""
+    """兜底：超时未完成的生成任务 → 失败（免费无限次，无退款）。"""
     now = utcnow()
     cutoff = now - timedelta(minutes=STUCK_MINUTES)
     with SessionLocal() as db:
@@ -142,7 +141,7 @@ def sweep_stuck_generations() -> None:
             created = coerce_aware(gen.created_at)
             if created < cutoff:
                 gen.status = "failed"
-                gen.fail_reason = "处理超时，已自动退回次数"
+                gen.fail_reason = "处理超时，已自动标记失败"
                 gen.finished_at = utcnow()
                 refund_generation(db, gen)
         db.commit()

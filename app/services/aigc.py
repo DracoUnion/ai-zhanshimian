@@ -1,20 +1,22 @@
 """AIGC 图生图适配器（可插拔）。
 
-- mock：本地生成占位图，便于开发/联调，不产生第三方费用。
-- http：通用 HTTP 网关适配（需对接实际 AIGC 平台时在此实现具体协议）。
+- mock：本地生成占位图，便于开发/联调，不产生第三方费用；
+- openai：真实生图一律通过 `OpenAIClient.call_tti`（OpenAI 兼容底座，
+  支持 gpt-image 系模型的参考图 img2img）。
 
-对齐详细设计「第三方 AIGC 接入用适配器隔离，换平台只改一处」。
+对齐详细设计「第三方 AIGC 接入用适配器隔离，换平台只改一处」；
+本项目所有 LLM / AIGC 调用统一走 `app/ai/openai_client.OpenAIClient`。
 """
 from __future__ import annotations
 
-import base64
 import io
 import random
 import time
 from functools import lru_cache
 
-import httpx
+import openai
 
+from app.ai.openai_client import OpenAIClient
 from app.config import get_settings
 
 settings = get_settings()
@@ -49,30 +51,44 @@ class MockAIGCService(AIGCService):
         return images
 
 
-class HttpAIGCService(AIGCService):
-    """通用 HTTP 网关适配。对接真实平台时按平台协议改写 payload/响应解析。"""
+class OpenAIAIGCService(AIGCService):
+    """真实生图：通过 OpenAIClient.call_tti 逐张生成（支持参考图 img2img）。"""
 
-    def __init__(self, url: str, token: str):
-        self.url = url
-        self.token = token
+    def __init__(self, api_key: str, base_url: str, model: str, size: str, retry: int = 3):
+        self.client = OpenAIClient(
+            api_key=api_key or "EMPTY",
+            base_url=base_url or None,
+            timeout=openai.Timeout(connect=60, read=180, write=None, pool=None),
+        )
+        self.model = model
+        self.size = size
+        self.retry = retry
 
     def transform(self, *, selfie, prompt, reference=None, n=1):
-        payload = {
-            "images": [base64.b64encode(selfie).decode()],
-            "prompt": prompt,
-            "n": n,
-        }
-        if reference:
-            payload["reference"] = base64.b64encode(reference).decode()
-        headers = {"Authorization": f"Bearer {self.token}"} if self.token else {}
-        resp = httpx.post(self.url, json=payload, headers=headers, timeout=180)
-        resp.raise_for_status()
-        data = resp.json()
-        return [base64.b64decode(img) for img in data["images"]]
+        images: list[bytes] = []
+        for _ in range(n):
+            blob = self.client.call_tti_retry(
+                text=prompt or "",
+                model_name=self.model,
+                size=self.size,
+                ref_img=selfie if selfie else reference,
+                retry=self.retry,
+                nothrow=False,
+            )
+            if not blob:
+                raise RuntimeError("生图返回为空")
+            images.append(blob)
+        return images
 
 
 @lru_cache
 def get_aigc() -> AIGCService:
-    if settings.aigc_provider == "http":
-        return HttpAIGCService(settings.aigc_http_url, settings.aigc_http_token)
+    if settings.aigc_provider == "openai":
+        return OpenAIAIGCService(
+            api_key=settings.aigc_http_token,
+            base_url=settings.aigc_http_url,
+            model=settings.aigc_model,
+            size=settings.aigc_image_size,
+            retry=settings.aigc_tti_retry,
+        )
     return MockAIGCService(settings.aigc_mock_delay)

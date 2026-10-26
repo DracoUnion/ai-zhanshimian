@@ -12,7 +12,6 @@ from app.core.errors import BizError, ErrCode
 from app.core.timeutil import utcnow
 from app.db.session import session_scope
 from app.models.generation import Generation
-from app.models.balance import BalanceTransaction
 from app.models.user import User
 from app.schemas.generation import (
     GenerationCreate,
@@ -23,7 +22,6 @@ from app.schemas.generation import (
 from app.schemas.template import TemplateOut
 from app.schemas.user import UserOut
 from app.services import generation as generation_service
-from app.services.billing import lock_user
 from app.services.local_user import get_local_user
 from app.services.storage import get_storage
 from app.services.upload import upload_service
@@ -33,15 +31,11 @@ settings = get_settings()
 
 # ---------- 本机账户 ----------
 def state() -> dict:
-    """本机账户当前状态（余额/解锁/试用），UI 各页与顶栏共用。"""
+    """本机账户信息（免费无限次，无余额/解锁概念）。"""
     with session_scope() as db:
         user = get_local_user(db)
         return {
             "user_id": user.id,
-            "credits": user.credits,
-            "unlocked": user.unlocked,
-            "trial_used": user.trial_used,
-            "trial_available": not user.trial_used,
             "nickname": user.nickname,
         }
 
@@ -114,14 +108,10 @@ def create_generation(
             raise BizError(ErrCode.UPLOAD_INVALID, "参考图来源非法")
 
         gen = generation_service.accept_generation(db, user, req, idempotency_key)
-        fresh = db.get(User, user.id)
         return {
             "generation_id": gen.id,
             "status": gen.status,
             "quantity": gen.quantity,
-            "credit_cost": gen.credit_cost,
-            "trial_used": fresh.trial_used if fresh else user.trial_used,
-            "balance": fresh.credits if fresh else user.credits,
         }
 
 
@@ -176,28 +166,3 @@ def delete_generation(gen_id: int) -> None:
         if gen is None:
             raise BizError(ErrCode.GENERATION_NOT_FOUND, "生成记录不存在", status_code=404)
         gen.deleted_at = utcnow()
-
-
-# ---------- 解锁（本地一次性，无订单无支付） ----------
-def unlock() -> dict:
-    """69 元解锁：本地直接完成，置解锁态并赠送次数（幂等，重复调用直接返回）。"""
-    with session_scope() as db:
-        user = get_local_user(db)
-        if not user.unlocked:
-            user = lock_user(db, user.id)
-            if not user.unlocked:
-                user.unlocked = True
-                user.credits += settings.welcome_credits
-                db.add(
-                    BalanceTransaction(
-                        user_id=user.id,
-                        amount=settings.welcome_credits,
-                        balance_after=user.credits,
-                        type="unlock",
-                        remark="69 元解锁包赠送",
-                    )
-                )
-        return {
-            "unlocked": user.unlocked,
-            "credits": user.credits,
-        }

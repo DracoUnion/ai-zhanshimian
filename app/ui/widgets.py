@@ -5,19 +5,16 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QButtonGroup, QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
-from . import theme
-
 _PAGES = [
     ("home", "首页"),
     ("workspace", "生成"),
     ("history", "记录"),
-    ("pricing", "定价"),
     ("account", "我的"),
 ]
 
 
 class Sidebar(QFrame):
-    """左侧导航：首页 / 生成 / 记录 / 定价 / 我的。切换发 `navigate(str)`。"""
+    """左侧导航：首页 / 生成 / 记录 / 我的。切换发 `navigate(str)`。"""
 
     navigate = Signal(str)
 
@@ -50,28 +47,13 @@ class Sidebar(QFrame):
 
         root.addStretch(1)
 
-        # 底部余额条
-        self.balance_row = QFrame()
-        self.balance_row.setProperty("statusbar", True)
-        bly = QHBoxLayout(self.balance_row)
-        bly.setContentsMargins(12, 6, 12, 6)
-        self.balance_label = QLabel("余额 —")
-        self.balance_label.setProperty("class", "accent")
-        bly.addWidget(self.balance_label)
-        root.addWidget(self.balance_row)
-
     def set_active(self, key: str) -> None:
         if key in self._buttons:
             self._buttons[key].setChecked(True)
 
-    def set_balance(self, credits: int) -> None:
-        self.balance_label.setText(f"可用 {credits} 次")
-
 
 class TopBar(QFrame):
-    """顶栏：当前页标题 + 右侧余额徽标。"""
-
-    payRequested = Signal()
+    """顶栏：当前页标题。"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -84,17 +66,8 @@ class TopBar(QFrame):
         lay.addWidget(self.title)
         lay.addStretch(1)
 
-        self.chip = QPushButton("可用 — 次")
-        self.chip.setProperty("chip", True)
-        self.chip.setCursor(Qt.PointingHandCursor)
-        self.chip.clicked.connect(self.payRequested)
-        lay.addWidget(self.chip)
-
     def set_title(self, text: str) -> None:
         self.title.setText(text)
-
-    def set_balance(self, credits: int) -> None:
-        self.chip.setText(f"可用 {credits} 次")
 
 
 class ClickableCard(QFrame):
