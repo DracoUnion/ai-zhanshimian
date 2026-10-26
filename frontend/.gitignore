@@ -1,6 +1,0 @@
-node_modules/
-dist/
-*.local
-.smoke/*.png
-.smoke/.smoke/
-.smoke/selfie.jpg
