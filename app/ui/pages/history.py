@@ -8,9 +8,9 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLay
 
 from app.schemas.generation import GenerationListItem
 
-from ..image import ImageLoader, is_local
-from ..worker import call_error_message, run_in_worker
-from .base import ScrollPage
+from app.ui.image import ImageLoader, is_local
+from app.ui.worker import call_error_message, run_in_worker
+from app.ui.pages.base import ScrollPage
 
 _STATUS_TEXT = {
     "pending": "排队中",
@@ -105,7 +105,7 @@ class HistoryPage(ScrollPage):
         self._fetch()
 
     def _item(self, it: GenerationListItem) -> QFrame:
-        from ..widgets import ClickableCard
+        from app.ui.widgets import ClickableCard
 
         row = ClickableCard()
         row.setProperty("listrow", True)

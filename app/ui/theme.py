@@ -1,22 +1,22 @@
-"""主题：黑金暗色设计令牌 + QSS（对标原前端 theme.css/app.css）。"""
+"""主题：GitHub 黑橙暗色设计令牌 + QSS。"""
 from __future__ import annotations
 
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication
 
-BG = "#0b0910"
-BG_SOFT = "#100d17"
-SURFACE = "#161220"
-SURFACE_2 = "#1e1830"
-BORDER = "rgba(255,255,255,0.08)"
-TEXT = "#f4f1ea"
-TEXT_DIM = "#a79f90"
-TEXT_FAINT = "#6f675c"
-ACCENT = "#d8b25f"
-ACCENT_BRIGHT = "#f0d48a"
-ACCENT_DIM = "rgba(216,178,95,0.14)"
-DANGER = "#e06a6a"
-OK = "#7cc07c"
+BG = "#0d1117"
+BG_SOFT = "#161b22"
+SURFACE = "#1b1f24"
+SURFACE_2 = "#24292f"
+BORDER = "rgba(240,246,252,0.16)"
+TEXT = "#f0f6fc"
+TEXT_DIM = "#8b949e"
+TEXT_FAINT = "#6e7681"
+ACCENT = "#ff9800"
+ACCENT_BRIGHT = "#ffad33"
+ACCENT_DIM = "rgba(255,152,0,0.18)"
+DANGER = "#f85149"
+OK = "#3fb950"
 
 
 def hex_alpha(hex_color: str, alpha: int) -> str:
@@ -79,13 +79,13 @@ QPushButton {{
     background: {SURFACE_2};
     border-color: {BORDER};
 }}
-QPushButton:hover {{ background: {hex_alpha("#3a3152", 120)}; }}
+QPushButton:hover {{ background: {hex_alpha("#30363d", 140)}; }}
 QPushButton:pressed {{ padding-top: 10px; padding-bottom: 8px; }}
 QPushButton:disabled {{ opacity: 0.45; }}
 
 QPushButton[class="gold"] {{
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 {ACCENT}, stop:1 {ACCENT_BRIGHT});
-    color: #1c1505;
+    color: #111111;
 }}
 QPushButton[class="gold"]:hover {{ background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 {ACCENT_BRIGHT}, stop:1 {hex_alpha(ACCENT_BRIGHT, 220)}); }}
 
@@ -94,7 +94,7 @@ QPushButton[class="ghost"] {{
     border: 1px solid {BORDER};
     color: {TEXT};
 }}
-QPushButton[class="ghost"]:hover {{ background: {hex_alpha("#3a3152", 120)}; }}
+QPushButton[class="ghost"]:hover {{ background: {hex_alpha("#30363d", 140)}; }}
 
 QPushButton[class="ghost"]:disabled, QPushButton[class="gold"]:disabled {{
     background: {SURFACE_2}; color: {TEXT_FAINT};
@@ -242,14 +242,14 @@ QLabel[badge="ok"] {{
     padding: 3px 10px;
     font-size: 11px;
     color: {OK};
-    background: {hex_alpha("#7cc07c", 20)};
+    background: {hex_alpha(OK, 28)};
 }}
 QLabel[badge="danger"] {{
     border-radius: 999px;
     padding: 3px 10px;
     font-size: 11px;
     color: {DANGER};
-    background: {hex_alpha("#e06a6a", 22)};
+    background: {hex_alpha(DANGER, 28)};
 }}
 QLabel[badge="gold"] {{
     border-radius: 999px;

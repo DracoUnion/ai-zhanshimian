@@ -5,14 +5,14 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QMainWindow, QStackedWidget, QVBoxLayout, QWidget
 
-from .context import AppContext
-from .pages.account import AccountPage
-from .pages.history import HistoryPage
-from .pages.home import HomePage
-from .pages.result import ResultPage
-from .pages.workspace import WorkspacePage
-from .toast import ToastManager
-from .widgets import Sidebar, TopBar
+from app.ui.context import AppContext
+from app.ui.pages.account import AccountPage
+from app.ui.pages.history import HistoryPage
+from app.ui.pages.home import HomePage
+from app.ui.pages.result import ResultPage
+from app.ui.pages.workspace import WorkspacePage
+from app.ui.toast import ToastManager
+from app.ui.widgets import Sidebar, TopBar
 
 _PAGE_TITLES = {
     "home": "AI 展示面大师",

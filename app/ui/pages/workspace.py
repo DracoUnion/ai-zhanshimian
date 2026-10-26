@@ -16,10 +16,10 @@ from PySide6.QtWidgets import (
 
 from app.services import facade as svc
 
-from ..components.upload_card import UploadCard
-from ..template_picker import TemplatePicker
-from ..worker import call_error_message, run_in_worker
-from .base import ScrollPage
+from app.ui.components.upload_card import UploadCard
+from app.ui.template_picker import TemplatePicker
+from app.ui.worker import call_error_message, run_in_worker
+from app.ui.pages.base import ScrollPage
 
 PROMPT_PRESETS = ["日系", "商务", "运动", "文艺", "都市"]
 QTY_OPTIONS = [(1, "单张"), (6, "成组"), (12, "系列出图")]

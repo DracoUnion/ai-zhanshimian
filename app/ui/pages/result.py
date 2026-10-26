@@ -18,9 +18,9 @@ from PySide6.QtWidgets import (
 
 from app.schemas.generation import GenerationDetail, ResultImage
 
-from ..image import ImageLoader, is_local
-from ..worker import Poller, call_error_message, run_in_worker
-from .base import ScrollPage
+from app.ui.image import ImageLoader, is_local
+from app.ui.worker import Poller, call_error_message, run_in_worker
+from app.ui.pages.base import ScrollPage
 
 
 class ResultPage(ScrollPage):

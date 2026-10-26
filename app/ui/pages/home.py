@@ -4,8 +4,8 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
-from ..widgets import banner_label
-from .base import ScrollPage
+from app.ui.widgets import banner_label
+from app.ui.pages.base import ScrollPage
 
 STEPS = [
     ("01", "上传一张正面自拍", "不改变五官，只优化穿搭、光线与场景"),

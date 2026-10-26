@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
-    from .toast import ToastManager
+    from app.ui.toast import ToastManager
 
 
 class AppContext:

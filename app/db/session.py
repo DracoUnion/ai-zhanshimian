@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
-from ..config import get_settings
+from app.config import get_settings
 
 settings = get_settings()
 
