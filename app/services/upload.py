@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from app.config import get_settings
-from app.core.errors import BizError, ErrCode
-from app.services.storage import get_storage
+from config import get_settings
+from core.errors import BizError, ErrCode
+from services.storage import get_storage
 
 settings = get_settings()
 

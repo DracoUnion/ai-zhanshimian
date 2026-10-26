@@ -69,7 +69,7 @@ def run_in_worker(
 
 
 def call_error_message(ce: _CallError) -> str:
-    from app.core.errors import BizError
+    from core.errors import BizError
 
     if isinstance(ce.exc, BizError):
         return ce.exc.message

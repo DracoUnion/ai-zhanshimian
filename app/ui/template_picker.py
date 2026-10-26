@@ -5,8 +5,8 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QButtonGroup, QGridLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
-from app.schemas.template import TemplateOut
-from app.ui.image import ImageLoader, is_local
+from schemas.template import TemplateOut
+from ui.image import ImageLoader, is_local
 
 PALETTE = ["#2b2a45", "#223a34", "#381f2d", "#2e3a25", "#332e1d"]
 

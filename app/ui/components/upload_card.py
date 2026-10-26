@@ -6,9 +6,9 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFileDialog, QFrame, QLabel, QVBoxLayout
 
-from app.services import facade as svc
-from app.ui.image_tools import compress_image_bytes
-from app.ui.worker import call_error_message, run_in_worker
+from services import facade as svc
+from ui.image_tools import compress_image_bytes
+from ui.worker import call_error_message, run_in_worker
 
 
 class UploadCard(QFrame):

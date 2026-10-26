@@ -4,14 +4,14 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.core.errors import BizError, ErrCode
-from app.models.generation import Generation
-from app.models.idempotency import IdempotencyKey
-from app.models.template import Template
-from app.models.user import User
-from app.schemas.generation import GenerationCreate
-from app.services.storage import get_storage
+from config import get_settings
+from core.errors import BizError, ErrCode
+from models.generation import Generation
+from models.idempotency import IdempotencyKey
+from models.template import Template
+from models.user import User
+from schemas.generation import GenerationCreate
+from services.storage import get_storage
 
 settings = get_settings()
 
@@ -47,7 +47,7 @@ def accept_generation(db: Session, user: User, req: GenerationCreate, idem_key: 
     db.commit()
 
     # 投递后台任务（桌面端线程池内联执行；见 app/tasks/generation_exec.py）
-    from app.tasks.generation_exec import submit_generation
+    from tasks.generation_exec import submit_generation
 
     submit_generation(gen.id)
 

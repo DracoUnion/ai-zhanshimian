@@ -6,8 +6,8 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, Integer, String, Text, func, true
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.timeutil import utcnow
-from app.db.base import Base
+from core.timeutil import utcnow
+from db.base import Base
 
 
 class Template(Base):

@@ -16,11 +16,11 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from app.schemas.generation import GenerationDetail, ResultImage
+from schemas.generation import GenerationDetail, ResultImage
 
-from app.ui.image import ImageLoader, is_local
-from app.ui.worker import Poller, call_error_message, run_in_worker
-from app.ui.pages.base import ScrollPage
+from ui.image import ImageLoader, is_local
+from ui.worker import Poller, call_error_message, run_in_worker
+from ui.pages.base import ScrollPage
 
 
 class ResultPage(ScrollPage):
@@ -231,6 +231,6 @@ class ResultPage(ScrollPage):
 
 
 def _fetch_detail(gen_id: int) -> dict:
-    from app.services import facade as svc
+    from services import facade as svc
 
     return svc.generation_detail(gen_id)

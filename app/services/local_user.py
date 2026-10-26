@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from sqlalchemy import select
 
-from app.db.session import session_scope
-from app.models.user import User
+from db.session import session_scope
+from models.user import User
 
 
 def get_local_user(db) -> User:

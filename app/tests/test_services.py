@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import pytest
 
-from app.core.errors import BizError, ErrCode
-from app.services import facade as svc
-from app.tasks.generation_exec import run_generation
+from core.errors import BizError, ErrCode
+from services import facade as svc
+from tasks.generation_exec import run_generation
 
 
 def _upload(kind="selfie") -> dict:

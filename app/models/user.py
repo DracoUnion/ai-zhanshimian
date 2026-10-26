@@ -6,8 +6,8 @@ from datetime import datetime
 from sqlalchemy import CheckConstraint, DateTime, Integer, SmallInteger, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.timeutil import utcnow
-from app.db.base import Base
+from core.timeutil import utcnow
+from db.base import Base
 
 
 class User(Base):

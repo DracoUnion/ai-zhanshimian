@@ -14,12 +14,12 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from app.services import facade as svc
+from services import facade as svc
 
-from app.ui.components.upload_card import UploadCard
-from app.ui.template_picker import TemplatePicker
-from app.ui.worker import call_error_message, run_in_worker
-from app.ui.pages.base import ScrollPage
+from ui.components.upload_card import UploadCard
+from ui.template_picker import TemplatePicker
+from ui.worker import call_error_message, run_in_worker
+from ui.pages.base import ScrollPage
 
 PROMPT_PRESETS = ["日系", "商务", "运动", "文艺", "都市"]
 QTY_OPTIONS = [(1, "单张"), (6, "成组"), (12, "系列出图")]
@@ -151,7 +151,7 @@ class WorkspacePage(ScrollPage):
 
     def _render_templates(self, items: list[dict]) -> None:
         self._template_loading.hide()
-        from app.schemas.template import TemplateOut
+        from schemas.template import TemplateOut
 
         templates = [TemplateOut(**it) for it in items]
         self.template_picker = TemplatePicker(templates)

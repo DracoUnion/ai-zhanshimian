@@ -9,7 +9,7 @@ import pytest
 
 def test_openai_client_class_api():
     """OpenAIClient 类可用且保留 LLM/AIGC 调用方法。"""
-    from app.ai.openai_client import OpenAIClient
+    from ai.openai_client import OpenAIClient
 
     client = OpenAIClient(api_key="test", base_url=None)
     for name in ("call_llm", "call_llm_retry", "call_vlm_retry", "call_tti", "call_tti_retry"):
@@ -18,7 +18,7 @@ def test_openai_client_class_api():
 
 def test_mock_provider_offline():
     """default/mock 生图不依赖 API，且返回 n 张 JPEG。"""
-    from app.services import aigc
+    from services import aigc
 
     svc = aigc.get_aigc()
     assert isinstance(svc, aigc.MockAIGCService)
@@ -29,7 +29,7 @@ def test_mock_provider_offline():
 
 def test_openai_provider_goes_through_OpenAIClient(fresh_db):
     """AIGC_PROVIDER=openai 时，transform 逐张走 OpenAIClient.call_tti。"""
-    from app.services import aigc
+    from services import aigc
 
     svc = aigc.OpenAIAIGCService(api_key="k", base_url="http://127.0.0.1:9", model="gpt-image-1", size="1024x1024")
     assert isinstance(svc.client, aigc.OpenAIClient)

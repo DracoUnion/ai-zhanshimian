@@ -22,7 +22,7 @@ def compress_image_bytes(path: str, max_w: int = 1200, max_h: int = 1700, qualit
     """读取并压缩为 JPEG 字节，返回 (bytes, content_type)。"""
     from PIL import Image
 
-    from app.core.errors import BizError, ErrCode
+    from core.errors import BizError, ErrCode
 
     ct = content_type_for(path)
     if ct is None:

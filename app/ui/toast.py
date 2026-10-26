@@ -4,7 +4,7 @@ from __future__ import annotations
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer
 from PySide6.QtWidgets import QGraphicsOpacityEffect, QLabel, QWidget
 
-from app.ui.theme import ACCENT_DIM, BORDER, DANGER, OK, SURFACE_2, TEXT
+from ui.theme import ACCENT_DIM, BORDER, DANGER, OK, SURFACE_2, TEXT
 
 _KIND_STYLE = {
     "info": f"color:{TEXT}; background:{SURFACE_2}; border:1px solid {BORDER};",

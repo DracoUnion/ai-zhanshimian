@@ -21,7 +21,7 @@ def _pump(qapp, rounds=6, delay=0.02):
 
 
 def test_main_window_builds_and_navigates(qapp, fresh_db):
-    from app.ui.main_window import MainWindow
+    from ui.main_window import MainWindow
 
     win = MainWindow()
     win.show()
@@ -37,9 +37,9 @@ def test_main_window_builds_and_navigates(qapp, fresh_db):
 
 
 def test_result_page_renders_generation(qapp, fresh_db, sync_generation):
-    from app.services import facade as svc
-    from app.tasks.generation_exec import run_generation
-    from app.ui.main_window import MainWindow
+    from services import facade as svc
+    from tasks.generation_exec import run_generation
+    from ui.main_window import MainWindow
 
     up = svc.upload_image("selfie", b"\xff\xd8mock", "image/jpeg")
     created = svc.create_generation(selfie_key=up["object_key"], template_id=1, quantity=1)

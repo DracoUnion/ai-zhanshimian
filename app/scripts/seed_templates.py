@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from sqlalchemy import func, select
 
-from app.config import get_settings
-from app.db.session import SessionLocal
-from app.models.template import Template
+from config import get_settings
+from db.session import SessionLocal
+from models.template import Template
 
 settings = get_settings()
 

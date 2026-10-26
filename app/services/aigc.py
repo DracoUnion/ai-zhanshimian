@@ -16,8 +16,8 @@ from functools import lru_cache
 
 import openai
 
-from app.ai.openai_client import OpenAIClient
-from app.config import get_settings
+from ai.openai_client import OpenAIClient
+from config import get_settings
 
 settings = get_settings()
 

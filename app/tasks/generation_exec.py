@@ -15,12 +15,12 @@ from datetime import timedelta
 
 from sqlalchemy import select
 
-from app.core.timeutil import coerce_aware, utcnow
-from app.db.session import SessionLocal
-from app.models.generation import Generation
-from app.models.template import Template
-from app.services.aigc import get_aigc
-from app.services.storage import get_storage
+from core.timeutil import coerce_aware, utcnow
+from db.session import SessionLocal
+from models.generation import Generation
+from models.template import Template
+from services.aigc import get_aigc
+from services.storage import get_storage
 
 logger = logging.getLogger(__name__)
 

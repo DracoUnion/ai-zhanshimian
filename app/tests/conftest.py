@@ -20,11 +20,11 @@ import pytest  # noqa: E402
 @pytest.fixture()
 def fresh_db():
     """重建全部表 + 种子模板 + 本机账户（每个测试独立、可重复）。"""
-    from app.db import base as _base
-    from app.db import register_models
-    from app.db.session import engine, init_db
-    from app.scripts.seed_templates import seed_templates
-    from app.services.local_user import ensure_local_user
+    from db import base as _base
+    from db import register_models
+    from db.session import engine, init_db
+    from scripts.seed_templates import seed_templates
+    from services.local_user import ensure_local_user
 
     register_models()
     _base.Base.metadata.drop_all(engine)
@@ -43,7 +43,7 @@ def fresh_db():
 @pytest.fixture()
 def sync_generation():
     """生图任务改为手动同步调用（AUTO_RUN=False），保证测试确定性。"""
-    from app.tasks import generation_exec
+    from tasks import generation_exec
 
     generation_exec.AUTO_RUN = False
     yield

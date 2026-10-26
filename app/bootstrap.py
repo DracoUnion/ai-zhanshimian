@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import logging
 
-from app.config import get_settings
-from app.db.session import init_db
-from app.scripts.seed_templates import seed_templates
-from app.services.local_user import ensure_local_user
-from app.tasks.generation_exec import configure_pool
+from config import get_settings
+from db.session import init_db
+from scripts.seed_templates import seed_templates
+from services.local_user import ensure_local_user
+from tasks.generation_exec import configure_pool
 
 logger = logging.getLogger(__name__)
 settings = get_settings()

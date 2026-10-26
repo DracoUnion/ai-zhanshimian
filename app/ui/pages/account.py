@@ -11,10 +11,10 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from app.services import facade as svc
+from services import facade as svc
 
-from app.ui.worker import call_error_message, run_in_worker
-from app.ui.pages.base import ScrollPage
+from ui.worker import call_error_message, run_in_worker
+from ui.pages.base import ScrollPage
 
 
 class AccountPage(ScrollPage):

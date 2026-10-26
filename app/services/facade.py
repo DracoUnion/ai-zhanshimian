@@ -7,24 +7,24 @@ from __future__ import annotations
 
 from sqlalchemy import func, select
 
-from app.config import get_settings
-from app.core.errors import BizError, ErrCode
-from app.core.timeutil import utcnow
-from app.db.session import session_scope
-from app.models.generation import Generation
-from app.models.user import User
-from app.schemas.generation import (
+from config import get_settings
+from core.errors import BizError, ErrCode
+from core.timeutil import utcnow
+from db.session import session_scope
+from models.generation import Generation
+from models.user import User
+from schemas.generation import (
     GenerationCreate,
     GenerationDetail,
     GenerationListOut,
     GenerationListItem,
 )
-from app.schemas.template import TemplateOut
-from app.schemas.user import UserOut
-from app.services import generation as generation_service
-from app.services.local_user import get_local_user
-from app.services.storage import get_storage
-from app.services.upload import upload_service
+from schemas.template import TemplateOut
+from schemas.user import UserOut
+from services import generation as generation_service
+from services.local_user import get_local_user
+from services.storage import get_storage
+from services.upload import upload_service
 
 settings = get_settings()
 
@@ -52,7 +52,7 @@ def update_profile(*, nickname: str | None = None) -> dict:
 # ---------- 模板 ----------
 def templates() -> list[dict]:
     with session_scope() as db:
-        from app.models.template import Template
+        from models.template import Template
         from sqlalchemy import select
 
         rows = db.execute(

@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
-from app.config import get_settings
+from config import get_settings
 
 settings = get_settings()
 
@@ -44,8 +44,8 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 
 def init_db() -> None:
     """开发便捷：直接建表。生产请使用 alembic。"""
-    from app.db.base import Base
-    from app.db import register_models
+    from db.base import Base
+    from db import register_models
 
     register_models()
     Base.metadata.create_all(engine)

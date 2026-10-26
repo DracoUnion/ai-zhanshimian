@@ -8,8 +8,8 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 
-from app.config import get_settings
-from app.core.errors import BizError, ErrCode
+from config import get_settings
+from core.errors import BizError, ErrCode
 
 settings = get_settings()
 
