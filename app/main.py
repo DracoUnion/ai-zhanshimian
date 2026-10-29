@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 
 def main() -> int:
     settings = get_settings()
-    bootstrap()
+    ctx = bootstrap()
 
     app = QApplication(sys.argv)
     app.setApplicationName(settings.app_name)
@@ -29,7 +29,9 @@ def main() -> int:
 
     window = MainWindow()
     window.show()
-    return app.exec()
+    code = app.exec()
+    ctx.tasks.shutdown(wait=False)
+    return code
 
 
 if __name__ == "__main__":
